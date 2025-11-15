@@ -8,23 +8,27 @@
       name="description"
       content="Curious Kids Parent Forum – a safe, adult-only space for parents to ask, discuss and support each other."
     />
+
+    <!-- ✅ PWA manifest + theme color should be in HEAD -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#ff8a3d" />
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#ff8a3d">
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .catch(function (err) {
-          console.log("SW registration failed:", err);
-        });
-    });
-  }
-</script>
 
+    <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ✅ Service worker registration is fine here, before </body> -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .catch(function (err) {
+              console.log("SW registration failed:", err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
