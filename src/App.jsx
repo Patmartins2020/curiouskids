@@ -251,15 +251,26 @@ function App() {
         <div className="pf-header-left">
 
           {/* NEW — Logo now opens Admin Panel if user.isAdmin */}
-          <div
-            className="pf-logo"
-            onClick={() => {
-              if (user.isAdmin) setShowAdminPanel(true);
-            }}
-            style={{ cursor: user.isAdmin ? "pointer" : "default" }}
-          >
-            CK
-          </div>
+         <div
+  className="pf-logo"
+  onClick={() => {
+    window._ckClicks = (window._ckClicks || 0) + 1;
+    if (window._ckClicks >= 5) {
+      const code = prompt("Enter admin code:", "");
+      if (code === ADMIN_SECRET) {
+        setUser(prev => ({ ...prev, isAdmin: true }));
+        setShowAdminPanel(true);
+        setMessage("Admin mode enabled.");
+      } else {
+        setMessage("Incorrect admin code.");
+      }
+      window._ckClicks = 0;
+    }
+  }}
+>
+  CK
+</div>
+
 
           <div>
             <div className="pf-title">Curious Kids Parent Forum</div>
@@ -293,14 +304,7 @@ function App() {
               </button>
             )}
 
-            {!user.isAdmin && (
-              <button
-                className="pf-btn pf-btn-ghost pf-btn-small"
-                onClick={handleAdminLogin}
-              >
-                Admin Login
-              </button>
-            )}
+          
 
             {user.isAdmin && (
               <button
