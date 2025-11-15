@@ -1,0 +1,19 @@
+:root {
+  --pf-bg: #f7fbff;
+  --pf-card: #ffffff;
+  --pf-border: rgba(148, 163, 184, 0.4);
+  --pf-text: #111827;
+  --pf-muted: #6b7280;
+  --pf-primary: #2563eb;
+  --pf-primary-soft: #dbeafe;
+  --pf-danger: #b91c1c;
+  --pf-radius-lg: 18px;
+  --pf-radius-sm: 10px;
+  --pf-shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --pf-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+*,
+
+/* ...[CSS continues exactly as I gave you earlier]... */
