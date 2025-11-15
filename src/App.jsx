@@ -120,9 +120,13 @@ function App() {
       isPremiumOnly: false
     }
   ]);
+
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
   const [message, setMessage] = useState("");
+
+  // NEW — Admin page toggle
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   const categories = [...FREE_CATEGORIES, ...PREMIUM_CATEGORIES];
 
@@ -135,9 +139,7 @@ function App() {
 
   function handleUpgrade() {
     setUser((prev) => ({ ...prev, isPremium: true }));
-    setMessage(
-      "You are now viewing the forum as a Premium Parent (simulation only)."
-    );
+    setMessage("You are now viewing the forum as a Premium Parent (simulation only).");
   }
 
   function handleLoginNameChange() {
@@ -149,10 +151,12 @@ function App() {
     }));
   }
 
+  // NEW — Admin login now redirects to Admin Panel
   function handleAdminLogin() {
     const code = prompt("Enter admin code:", "");
     if (code === ADMIN_SECRET) {
       setUser((prev) => ({ ...prev, isAdmin: true }));
+      setShowAdminPanel(true);
       setMessage("Admin mode enabled on this device (demo only).");
     } else {
       setMessage("Incorrect admin code.");
@@ -160,11 +164,7 @@ function App() {
   }
 
   function clearAllThreads() {
-    if (
-      !window.confirm(
-        "Clear all threads? This cannot be undone (demo only)."
-      )
-    ) {
+    if (!window.confirm("Clear all threads? This cannot be undone (demo only).")) {
       return;
     }
     setThreads([]);
@@ -181,23 +181,17 @@ function App() {
     setMessage("");
 
     if (!newTitle.trim() || !newBody.trim()) {
-      setMessage(
-        "Please add a short title and a few more words in your post."
-      );
+      setMessage("Please add a short title and a few more words in your post.");
       return;
     }
 
     if (!canPostInCategory(selectedCategory)) {
-      setMessage(
-        "This room is for Premium Parents only. Please upgrade to post here."
-      );
+      setMessage("This room is for Premium Parents only. Please upgrade to post here.");
       return;
     }
 
     if (!user.isPremium && user.freeTopicsCreated >= 1) {
-      setMessage(
-        "Free parents can start 1 topic in this demo. Upgrade to share more."
-      );
+      setMessage("Free parents can start 1 topic in this demo. Upgrade to share more.");
       return;
     }
 
@@ -214,35 +208,72 @@ function App() {
     setThreads((prev) => [...prev, newThread]);
     setNewTitle("");
     setNewBody("");
+
     setUser((prev) => ({
       ...prev,
       freeTopicsCreated: prev.isPremium
         ? prev.freeTopicsCreated
         : prev.freeTopicsCreated + 1
     }));
+
     setMessage("Your topic has been added on this demo forum.");
+  }
+
+  // NEW — Admin Panel UI
+  if (showAdminPanel && user.isAdmin) {
+    return (
+      <div className="pf-admin">
+        <h1>Admin Panel</h1>
+        <p>You are viewing the administrator dashboard.</p>
+
+        <button
+          className="pf-btn pf-btn-danger"
+          onClick={clearAllThreads}
+          style={{ marginTop: 20 }}
+        >
+          Clear All Threads
+        </button>
+
+        <button
+          className="pf-btn pf-btn-primary"
+          onClick={() => setShowAdminPanel(false)}
+          style={{ marginTop: 20 }}
+        >
+          Return to Forum
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="pf-root">
       <header className="pf-header">
         <div className="pf-header-left">
-          <div className="pf-logo">CK</div>
+
+          {/* NEW — Logo now opens Admin Panel if user.isAdmin */}
+          <div
+            className="pf-logo"
+            onClick={() => {
+              if (user.isAdmin) setShowAdminPanel(true);
+            }}
+            style={{ cursor: user.isAdmin ? "pointer" : "default" }}
+          >
+            CK
+          </div>
+
           <div>
             <div className="pf-title">Curious Kids Parent Forum</div>
             <div className="pf-subtitle">
-              Safe, adult-only conversations. Children should not use this
-              forum.
+              Safe, adult-only conversations. Children should not use this forum.
             </div>
           </div>
         </div>
+
         <div className="pf-header-right">
           <div className="pf-user">
             <span className="pf-user-name">{user.displayName}</span>
             {user.isPremium ? (
-              <span className="pf-badge pf-badge-premium">
-                Premium Parent
-              </span>
+              <span className="pf-badge pf-badge-premium">Premium Parent</span>
             ) : (
               <span className="pf-badge pf-badge-free">Free Parent</span>
             )}
@@ -250,35 +281,29 @@ function App() {
               <span className="pf-badge pf-badge-admin">Admin</span>
             )}
           </div>
+
           <div className="pf-actions">
-            <button
-              type="button"
-              className="pf-btn pf-btn-ghost"
-              onClick={handleLoginNameChange}
-            >
+            <button className="pf-btn pf-btn-ghost" onClick={handleLoginNameChange}>
               Change Name
             </button>
+
             {!user.isPremium && (
-              <button
-                type="button"
-                className="pf-btn pf-btn-primary"
-                onClick={handleUpgrade}
-              >
+              <button className="pf-btn pf-btn-primary" onClick={handleUpgrade}>
                 Upgrade – $4.99/month (demo)
               </button>
             )}
+
             {!user.isAdmin && (
               <button
-                type="button"
                 className="pf-btn pf-btn-ghost pf-btn-small"
                 onClick={handleAdminLogin}
               >
                 Admin Login
               </button>
             )}
+
             {user.isAdmin && (
               <button
-                type="button"
                 className="pf-btn pf-btn-danger pf-btn-small"
                 onClick={clearAllThreads}
               >
@@ -290,6 +315,8 @@ function App() {
       </header>
 
       <main className="pf-main">
+
+        {/* SIDEBAR */}
         <aside className="pf-sidebar">
           <div className="pf-section-label">Free Rooms</div>
           <ul className="pf-cat-list">
@@ -299,9 +326,7 @@ function App() {
                   type="button"
                   className={
                     "pf-cat-btn" +
-                    (selectedCategoryId === cat.id
-                      ? " pf-cat-btn-active"
-                      : "")
+                    (selectedCategoryId === cat.id ? " pf-cat-btn-active" : "")
                   }
                   onClick={() => setSelectedCategoryId(cat.id)}
                 >
@@ -316,34 +341,26 @@ function App() {
           <div className="pf-section-label">Premium Rooms</div>
           <ul className="pf-cat-list">
             {PREMIUM_CATEGORIES.map((cat) => {
-              const isLocked = !user.isPremium;
-              const isActive = selectedCategoryId === cat.id;
+              const locked = !user.isPremium;
+              const active = selectedCategoryId === cat.id;
               return (
                 <li key={cat.id}>
                   <button
-                    type="button"
                     className={
                       "pf-cat-btn" +
-                      (isActive ? " pf-cat-btn-active" : "") +
-                      (isLocked ? " pf-cat-btn-locked" : "")
+                      (active ? " pf-cat-btn-active" : "") +
+                      (locked ? " pf-cat-btn-locked" : "")
                     }
-                    onClick={() => {
-                      if (isLocked) {
-                        setMessage(
-                          "This room is for Premium Parents. Upgrade to enter."
-                        );
-                      } else {
-                        setSelectedCategoryId(cat.id);
-                      }
-                    }}
+                    onClick={() =>
+                      locked
+                        ? setMessage("This room is for Premium Parents. Upgrade to enter.")
+                        : setSelectedCategoryId(cat.id)
+                    }
                   >
                     <div className="pf-cat-name">
-                      {cat.name}
-                      {isLocked && <span className="pf-lock"> 🔒</span>}
+                      {cat.name} {locked && "🔒"}
                     </div>
-                    <div className="pf-cat-tag pf-cat-tag-premium">
-                      Premium Only
-                    </div>
+                    <div className="pf-cat-tag pf-cat-tag-premium">Premium Only</div>
                     <div className="pf-cat-desc">{cat.description}</div>
                   </button>
                 </li>
@@ -352,27 +369,22 @@ function App() {
           </ul>
 
           <div className="pf-note">
-            <strong>Note:</strong> This is a demo forum. Threads are stored
-            only in this browser and can be cleared by admin.
+            <strong>Note:</strong> Demo forum. Threads stored locally only.
           </div>
         </aside>
 
+        {/* MAIN CONTENT */}
         <section className="pf-content">
           <div className="pf-content-header">
             <h1>{selectedCategory?.name || "Forum"}</h1>
-            <p className="pf-content-description">
-              {selectedCategory?.description}
-            </p>
+            <p className="pf-content-description">{selectedCategory?.description}</p>
           </div>
 
           {message && <div className="pf-alert">{message}</div>}
 
           <div className="pf-threads">
             {visibleThreads.length === 0 ? (
-              <div className="pf-empty">
-                No topics here yet. Be the first to start a gentle
-                conversation.
-              </div>
+              <div className="pf-empty">No topics yet.</div>
             ) : (
               visibleThreads
                 .slice()
@@ -390,9 +402,7 @@ function App() {
                           })}
                         </span>
                         {t.isPremiumOnly && (
-                          <span className="pf-thread-pill">
-                            Premium Room
-                          </span>
+                          <span className="pf-thread-pill">Premium Room</span>
                         )}
                       </div>
                     </header>
@@ -404,19 +414,12 @@ function App() {
 
           <div className="pf-new-thread">
             <h2>Start a new topic</h2>
+
             {!canPostInCategory(selectedCategory) ? (
               <div className="pf-upgrade-box">
-                <p>
-                  This room is for <strong>Premium Parents</strong> only.
-                  Upgrade to share and discuss more sensitive topics in a
-                  private space.
-                </p>
+                <p>This room is for Premium Parents only.</p>
                 {!user.isPremium && (
-                  <button
-                    type="button"
-                    className="pf-btn pf-btn-primary"
-                    onClick={handleUpgrade}
-                  >
+                  <button className="pf-btn pf-btn-primary" onClick={handleUpgrade}>
                     Upgrade – $4.99/month (demo)
                   </button>
                 )}
@@ -434,22 +437,23 @@ function App() {
                     />
                   </label>
                 </div>
+
                 <div className="pf-form-row">
                   <label>
                     Your post
                     <textarea
                       value={newBody}
                       onChange={(e) => setNewBody(e.target.value)}
-                      placeholder="Share your question, story or struggle. Please keep real names and contact details private."
+                      placeholder="Share your question or story."
                       rows={4}
                     />
                   </label>
                 </div>
+
                 <div className="pf-form-footer">
                   {!user.isPremium && (
                     <div className="pf-form-hint">
-                      As a free parent in this demo, you can start 1 topic.
-                      Upgrade to share more and unlock all rooms.
+                      Free demo parents can create 1 topic.
                     </div>
                   )}
                   <button type="submit" className="pf-btn pf-btn-primary">
@@ -463,9 +467,7 @@ function App() {
       </main>
 
       <footer className="pf-footer">
-        © {new Date().getFullYear()} Curious Kids Q&amp;A – Parent Forum Demo.
-        This version does not collect real personal data or store posts on a
-        server.
+        © {new Date().getFullYear()} Curious Kids Q&A – Demo Forum.
       </footer>
     </div>
   );
