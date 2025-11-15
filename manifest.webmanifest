@@ -1,11 +1,14 @@
 {
-  "name": "Curious Kids Q&A",
-  "short_name": "Curious Kids",
-  "description": "A safe, kid-friendly place to ask big questions about God, life and the Bible.",
-  "start_url": "/index.html",
+  "name": "Curious Kids Parent Forum",
+  "short_name": "CuriousKids",
+  "description": "A safe, adult-only forum for curious kids' questions and family discussions.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#f7fbff",
+  "background_color": "#ffffff",
   "theme_color": "#ff8a3d",
+  "orientation": "portrait-primary",
+
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -16,6 +19,12 @@
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
